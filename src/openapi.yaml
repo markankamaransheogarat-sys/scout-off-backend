@@ -985,6 +985,14 @@ paths:
           schema:
             type: number
           description: Id of the stored unprocessed event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+              additionalProperties: false
       responses:
         '200':
           description: '{ success: true, data: { id, status, detail } }'

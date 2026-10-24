@@ -73,7 +73,7 @@ describe('securityEventPubSub', () => {
     await mod.closeSecurityEventSubscriber(); // idempotent no-op
   });
 
-  it('init with Redis subscribes to the three channels', async () => {
+  it('init with Redis subscribes to the four channels', async () => {
     const sub = makeSubscriber();
     const { mod } = loadWithRedis({}, sub);
     await mod.initSecurityEventSubscriber();
@@ -81,6 +81,7 @@ describe('securityEventPubSub', () => {
       'security:wallet_blocked',
       'security:wallet_unblocked',
       'security:token_revoked',
+      'security:api_key_revoked',
       expect.any(Function),
     );
     await mod.closeSecurityEventSubscriber();

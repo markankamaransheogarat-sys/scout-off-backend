@@ -348,7 +348,8 @@ env:
   # last SHUTDOWN_CLEANUP_RESERVE_MS are reserved for Redis/DB/tracing.
   SHUTDOWN_TIMEOUT_MS: "10000"
   SHUTDOWN_PRESTOP_DELAY_MS: "0"
-  SHUTDOWN_REQUEST_DRAIN_MS: "5000"
+  # Empty: half of SHUTDOWN_TIMEOUT_MS (5000 with the default timeout).
+  SHUTDOWN_REQUEST_DRAIN_MS: ""
   SHUTDOWN_CLEANUP_RESERVE_MS: "2000"
   # In-memory cache size caps (entries, >= 1)
   CACHE_MAX_ENTRIES: "1000"

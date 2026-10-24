@@ -82,9 +82,10 @@ describe('distributed tracing boundaries', () => {
   it.each(['redis.cache.invalidate', 'redis.security.consume', 'redis.sse.consume'])(
     'carries context and creates linked consumer spans for %s', async (name) => {
       let message = '';
-      let origin = { traceId: '', spanId: '', traceFlags: TraceFlags.NONE };
+      const origin = { traceId: '', spanId: '', traceFlags: TraceFlags.NONE };
       await tracer.startActiveSpan('publisher', async (span) => {
-        origin = span.spanContext();
+        // Identity fields only: an empty traceState is omitted once propagated.
+        ({ traceId: origin.traceId, spanId: origin.spanId, traceFlags: origin.traceFlags } = span.spanContext());
         message = encodeTracedMessage({ wallet: 'wallet' });
         span.end();
       });
@@ -134,9 +135,10 @@ describe('distributed tracing boundaries', () => {
   });
 
   it('persists the submission context without a correlation id and links delayed indexer events', async () => {
-    let origin = { traceId: '', spanId: '', traceFlags: TraceFlags.NONE };
+    const origin = { traceId: '', spanId: '', traceFlags: TraceFlags.NONE };
     await tracer.startActiveSpan('submission', async (span) => {
-      origin = span.spanContext();
+      // Identity fields only: an empty traceState is omitted once propagated.
+      ({ traceId: origin.traceId, spanId: origin.spanId, traceFlags: origin.traceFlags } = span.spanContext());
       await recordTxCorrelation('trace-only-transaction');
       span.end();
     });
@@ -167,9 +169,10 @@ describe('distributed tracing boundaries', () => {
 
   // The existing indexer ingestion path still uses the synchronous SQLite handle.
   (config.dbDriver === 'postgres' ? it.skip : it)('links real indexer event and SSE spans to a persisted origin', async () => {
-    let origin = { traceId: '', spanId: '', traceFlags: TraceFlags.NONE };
+    const origin = { traceId: '', spanId: '', traceFlags: TraceFlags.NONE };
     await tracer.startActiveSpan('originating-request', async (span) => {
-      origin = span.spanContext();
+      // Identity fields only: an empty traceState is omitted once propagated.
+      ({ traceId: origin.traceId, spanId: origin.spanId, traceFlags: origin.traceFlags } = span.spanContext());
       await recordTxCorrelation('real-indexer-trace');
       span.end();
     });

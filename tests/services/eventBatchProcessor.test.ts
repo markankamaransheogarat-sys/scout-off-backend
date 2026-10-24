@@ -26,6 +26,7 @@ jest.mock('../../src/services/indexer', () => ({
     type: 'test_event',
     payload: { txHash: (raw as { txHash?: string }).txHash ?? 'unknown' },
   }),
+  getIndexedContractIds: () => [process.env.CONTRACT_ID ?? 'CTEST'],
 }));
 
 import { processEventBatches } from '../../src/services/eventBatchProcessor';
@@ -151,13 +152,14 @@ describe('processEventBatches batching', () => {
   });
 
   it('moves on to the next batch when a batch returns no events', async () => {
-    const later = makeRaw({ ledger: 150, txHash: uniqueTx('later'), txIndex: 0, eventIndex: 0 });
+    // Two batches: 100-199 (empty) and 200-249 (one event).
+    const later = makeRaw({ ledger: 220, txHash: uniqueTx('later'), txIndex: 0, eventIndex: 0 });
     mockGetEvents
       .mockResolvedValueOnce({ events: [] })
       .mockResolvedValueOnce({ events: [later] });
     const result = await processEventBatches({
       fromLedger: 100,
-      toLedger: 199,
+      toLedger: 249,
       batchSize: 100,
       batchDelayMs: 0,
       adminWallet: 'GADMIN',

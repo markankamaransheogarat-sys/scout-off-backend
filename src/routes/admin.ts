@@ -501,7 +501,7 @@ router.route('/indexer/unprocessed')
  * @auth Bearer (admin role required)
  */
 router.route('/indexer/unprocessed/:id/retry')
-  .post(requireRole('admin'), retryUnprocessed)
+  .post(requireRole('admin'), validateBody(emptyBodySchema), retryUnprocessed)
   .all(methodNotAllowed(['POST']));
 
 /**

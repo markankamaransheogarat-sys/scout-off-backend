@@ -205,7 +205,10 @@ describe('reindex vs replay parity', () => {
 
     // ── Run replay on the same range ────────────────────────────────────────
     mockGetEvents.mockResolvedValue({ events: mockEvents });
-    await runReplay(200, 300, 'GADMIN');
+    // Multi-batch replay waits on an inter-batch setTimeout; advance fake timers.
+    const replayDone = runReplay(200, 300, 'GADMIN');
+    await jest.runAllTimersAsync();
+    await replayDone;
 
     const replayEvents = getAllEvents();
     _resetReplayState();

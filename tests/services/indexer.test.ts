@@ -327,36 +327,9 @@ describe('rollbackEventsFromLedger', () => {
 
 
 describe('__indexerHooks: fault injection API', () => {
-  it('allows beforeInsert to simulate a crash and verify idempotent reprocessing', async () => {
-    // Import the hooks API
-    const { __indexerHooks } = require('../../src/services/indexer');
-
-    // Track hook invocations
-    const hookCalls: string[] = [];
-    let shouldFailOnFirstCall = true;
-
-    // Override hooks to simulate a crash between insert and side effects
-    __indexerHooks.beforeInsert = (eventId: string) => {
-      hookCalls.push(`beforeInsert:${eventId}`);
-      if (shouldFailOnFirstCall) {
-        shouldFailOnFirstCall = false;
-        throw new Error('simulated crash before insert');
-      }
-    };
-
-    __indexerHooks.afterInsert = (eventId: string) => {
-      hookCalls.push(`afterInsert:${eventId}`);
-    };
-
-    try {
-      // First invocation should fail
-      throw new Error('Test setup incomplete - this would require full indexEvents() test');
-    } finally {
-      // Restore original (no-op) hooks to avoid affecting other tests
-      __indexerHooks.beforeInsert = (_eventId: string) => {};
-      __indexerHooks.afterInsert = (_eventId: string) => {};
-    }
-  });
+  // Needs a full indexEvents() harness (mocked RPC + DB) to drive the crash
+  // and the replay; tracked as a todo rather than a test that always throws.
+  it.todo('allows beforeInsert to simulate a crash and verify idempotent reprocessing');
 
   it('exports __indexerHooks as a typed hook registration API for tests', () => {
     const { __indexerHooks } = require('../../src/services/indexer');
