@@ -34,14 +34,6 @@ import { startFieldReencryptionJob, stopFieldReencryptionJob } from './services/
 import { applyHttpTimeouts } from "./httpServer";
 import { runShutdown } from "./shutdown";
 
-/** Reads a non-negative integer env var, falling back when unset/invalid. */
-function intFromEnv(name: string, fallback: number): number {
-  const raw = process.env[name];
-  if (raw === undefined || raw.trim() === "") return fallback;
-  const parsed = Number.parseInt(raw, 10);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
-}
-
 // Database initialization is now async - must be awaited
 async function start() {
   // Register the tier-divergence counter getter so the metrics endpoint can
@@ -244,14 +236,8 @@ async function startServer() {
 
   const SHUTDOWN_TIMEOUT_MS = config.shutdown.timeoutMs;
   const SHUTDOWN_PRESTOP_DELAY_MS = config.shutdown.prestopDelayMs;
-  const SHUTDOWN_REQUEST_DRAIN_MS = intFromEnv(
-    'SHUTDOWN_REQUEST_DRAIN_MS',
-    Math.floor(SHUTDOWN_TIMEOUT_MS * 0.5),
-  );
-  const SHUTDOWN_CLEANUP_RESERVE_MS = intFromEnv(
-    'SHUTDOWN_CLEANUP_RESERVE_MS',
-    2_000,
-  );
+  const SHUTDOWN_REQUEST_DRAIN_MS = config.shutdown.requestDrainMs ?? Math.floor(SHUTDOWN_TIMEOUT_MS * 0.5);
+  const SHUTDOWN_CLEANUP_RESERVE_MS = config.shutdown.cleanupReserveMs;
 
   const shutdown = async (signal: string, exitCode = 0) => {
     if (isShuttingDown) return;

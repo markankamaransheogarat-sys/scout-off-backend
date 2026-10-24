@@ -1,3 +1,10 @@
+/**
+ * Repository: indexed contract role memberships.
+ *
+ * Added after the #1535 split; `src/db/index.ts` re-exports every symbol below.
+ *
+ * Driver status: fully on `getDriver()` (async) — works on both SQLite and PostgreSQL.
+ */
 import { getDriver } from '../query';
 
 

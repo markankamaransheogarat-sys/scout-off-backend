@@ -99,14 +99,15 @@ export function metricsMiddleware(req: Request, res: Response, next: NextFunctio
     next();
     return;
   }
-  const start = Date.now();
+  const start = process.hrtime.bigint();
   res.on('finish', () => {
     // Use the matched Express route pattern when available; fall back to a
     // single constant label for all unmatched requests so scanner/bot traffic
     // cannot grow metricsStore without bound.
     const routeLabel = req.route?.path ?? UNMATCHED_ROUTE_LABEL;
     const key = `${req.method} ${routeLabel}`;
-    const latency = Date.now() - start;
+    // High-resolution timer: Date.now() rounds sub-millisecond requests to 0.
+    const latency = Number(process.hrtime.bigint() - start) / 1e6;
     if (!metricsStore[key]) {
       metricsStore[key] = { count: 0, totalLatencyMs: 0 };
     }

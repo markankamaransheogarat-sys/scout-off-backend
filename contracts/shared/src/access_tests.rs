@@ -29,51 +29,63 @@ fn grant_revoke_renounce_hierarchy_and_last_admin() {
     let member = Address::generate(&env);
     let outsider = Address::generate(&env);
     AccessHarnessClient::new(&env, &id).initialize(&admin);
-    env.as_contract(&id, || {
-        for name in ROLES {
-            assert!(has_role(&env, &Symbol::new(&env, name), &admin));
-        }
-        let root = Symbol::new(&env, DEFAULT_ADMIN);
-        let pause = Symbol::new(&env, PAUSER);
-        let fees = Symbol::new(&env, FEE_MANAGER);
-        assert_eq!(
-            grant_role(&env, &outsider, &pause, &member),
-            Err(Error::Unauthorized)
-        );
-        assert_eq!(
-            require_role(&env, &pause, &outsider),
-            Err(Error::Unauthorized)
-        );
-        assert_eq!(
-            revoke_role(&env, &outsider, &root, &admin),
-            Err(Error::Unauthorized)
-        );
-        assert_eq!(
-            revoke_role(&env, &admin, &root, &admin),
-            Err(Error::Unauthorized)
-        );
-        assert_eq!(renounce_role(&env, &admin, &root), Err(Error::Unauthorized));
-        grant_role(&env, &admin, &pause, &member).unwrap();
-        let events = env.events().all().len();
-        grant_role(&env, &admin, &pause, &member).unwrap();
-        assert_eq!(env.events().all().len(), events); // Idempotent grants.
-        require_role(&env, &pause, &member).unwrap();
-        assert_eq!(require_role(&env, &fees, &member), Err(Error::Unauthorized));
-        set_role_admin(&env, &admin, &fees, &pause).unwrap();
-        grant_role(&env, &member, &fees, &outsider).unwrap();
-        assert!(has_role(&env, &fees, &outsider));
-        revoke_role(&env, &member, &fees, &outsider).unwrap();
-        assert!(!has_role(&env, &fees, &outsider));
-        renounce_role(&env, &member, &pause).unwrap();
-        assert!(!has_role(&env, &pause, &member));
-        grant_role(&env, &admin, &root, &member).unwrap();
-        renounce_role(&env, &admin, &root).unwrap();
-        assert_eq!(
-            revoke_role(&env, &member, &root, &member),
-            Err(Error::Unauthorized)
-        );
-        assert_eq!(initialize(&env, &outsider), Err(Error::AlreadyInitialized));
-    });
+    // Each step runs in its own contract frame: an address may only be
+    // authorized once per frame, so chaining role calls in one frame fails
+    // with Error(Auth, ExistingValue).
+    let call = |f: &dyn Fn() -> Result<(), Error>| env.as_contract(&id, f);
+    let holds = |role: &Symbol, who: &Address| env.as_contract(&id, || has_role(&env, role, who));
+    for name in ROLES {
+        assert!(holds(&Symbol::new(&env, name), &admin));
+    }
+    let root = Symbol::new(&env, DEFAULT_ADMIN);
+    let pause = Symbol::new(&env, PAUSER);
+    let fees = Symbol::new(&env, FEE_MANAGER);
+    assert_eq!(
+        call(&|| grant_role(&env, &outsider, &pause, &member)),
+        Err(Error::Unauthorized)
+    );
+    assert_eq!(
+        call(&|| require_role(&env, &pause, &outsider)),
+        Err(Error::Unauthorized)
+    );
+    assert_eq!(
+        call(&|| revoke_role(&env, &outsider, &root, &admin)),
+        Err(Error::Unauthorized)
+    );
+    assert_eq!(
+        call(&|| revoke_role(&env, &admin, &root, &admin)),
+        Err(Error::Unauthorized)
+    );
+    assert_eq!(
+        call(&|| renounce_role(&env, &admin, &root)),
+        Err(Error::Unauthorized)
+    );
+    call(&|| grant_role(&env, &admin, &pause, &member)).unwrap();
+    let events = env.events().all().len();
+    call(&|| grant_role(&env, &admin, &pause, &member)).unwrap();
+    assert_eq!(env.events().all().len(), events); // Idempotent grants.
+    call(&|| require_role(&env, &pause, &member)).unwrap();
+    assert_eq!(
+        call(&|| require_role(&env, &fees, &member)),
+        Err(Error::Unauthorized)
+    );
+    call(&|| set_role_admin(&env, &admin, &fees, &pause)).unwrap();
+    call(&|| grant_role(&env, &member, &fees, &outsider)).unwrap();
+    assert!(holds(&fees, &outsider));
+    call(&|| revoke_role(&env, &member, &fees, &outsider)).unwrap();
+    assert!(!holds(&fees, &outsider));
+    call(&|| renounce_role(&env, &member, &pause)).unwrap();
+    assert!(!holds(&pause, &member));
+    call(&|| grant_role(&env, &admin, &root, &member)).unwrap();
+    call(&|| renounce_role(&env, &admin, &root)).unwrap();
+    assert_eq!(
+        call(&|| revoke_role(&env, &member, &root, &member)),
+        Err(Error::Unauthorized)
+    );
+    assert_eq!(
+        call(&|| initialize(&env, &outsider)),
+        Err(Error::AlreadyInitialized)
+    );
 }
 
 #[test]
@@ -99,31 +111,25 @@ proptest::proptest! {
         let admin = Address::generate(&env);
         let member = Address::generate(&env);
         AccessHarnessClient::new(&env, &id).initialize(&admin);
-        env.as_contract(&id, || {
-            let role = Symbol::new(&env, DEFAULT_ADMIN);
-            for op in operations {
-                // Pick a currently authorized root to administer every transition.
-                let caller = if has_role(&env, &role, &admin) {
-                    admin.clone()
-                } else {
-                    member.clone()
+        let role = Symbol::new(&env, DEFAULT_ADMIN);
+        let holds = |who: &Address| env.as_contract(&id, || has_role(&env, &role, who));
+        for op in operations {
+            // Pick a currently authorized root to administer every transition.
+            let caller = if holds(&admin) {
+                admin.clone()
+            } else {
+                member.clone()
+            };
+            // One frame per operation; see grant_revoke_renounce_hierarchy_and_last_admin.
+            env.as_contract(&id, || {
+                let _ = match op {
+                    0 => grant_role(&env, &caller, &role, &admin),
+                    1 => grant_role(&env, &caller, &role, &member),
+                    2 => revoke_role(&env, &caller, &role, &admin),
+                    _ => renounce_role(&env, &caller, &role),
                 };
-                match op {
-                    0 => {
-                        let _ = grant_role(&env, &caller, &role, &admin);
-                    }
-                    1 => {
-                        let _ = grant_role(&env, &caller, &role, &member);
-                    }
-                    2 => {
-                        let _ = revoke_role(&env, &caller, &role, &admin);
-                    }
-                    _ => {
-                        let _ = renounce_role(&env, &caller, &role);
-                    }
-                }
-                assert!(has_role(&env, &role, &admin) || has_role(&env, &role, &member));
-            }
-        });
+            });
+            assert!(holds(&admin) || holds(&member));
+        }
     }
 }

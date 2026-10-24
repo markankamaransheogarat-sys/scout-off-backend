@@ -891,6 +891,12 @@ const config = {
   shutdown: {
     timeoutMs: parseNumericEnv('SHUTDOWN_TIMEOUT_MS', process.env.SHUTDOWN_TIMEOUT_MS, 10_000, { min: 1_000, max: 600_000, integer: true }),
     prestopDelayMs: parseNumericEnv('SHUTDOWN_PRESTOP_DELAY_MS', process.env.SHUTDOWN_PRESTOP_DELAY_MS, 0, { min: 0, max: 120_000, integer: true }),
+    /** In-flight request drain window. Unset: half of timeoutMs (see src/shutdown.ts). */
+    requestDrainMs: process.env.SHUTDOWN_REQUEST_DRAIN_MS?.trim()
+      ? parseNumericEnv('SHUTDOWN_REQUEST_DRAIN_MS', process.env.SHUTDOWN_REQUEST_DRAIN_MS, 0, { min: 0, max: 600000, integer: true })
+      : undefined,
+    /** Slice of the budget reserved for Redis/DB/tracing cleanup. */
+    cleanupReserveMs: parseNumericEnv('SHUTDOWN_CLEANUP_RESERVE_MS', process.env.SHUTDOWN_CLEANUP_RESERVE_MS, 2_000, { min: 0, max: 600000, integer: true }),
   },
 
   // ── Server-Sent Events (SSE) ──────────────────────────────────────────

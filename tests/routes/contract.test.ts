@@ -16,6 +16,7 @@ const SECRET = process.env.JWT_SECRET ?? 'test-secret';
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
 jest.mock('../../src/db', () => ({
+  listContractRoleMembers: jest.fn().mockResolvedValue([]),
   queryEvents: jest.fn().mockReturnValue([]),
   queryPlayers: jest.fn().mockReturnValue([]),
   countPlayers: jest.fn().mockReturnValue(0),

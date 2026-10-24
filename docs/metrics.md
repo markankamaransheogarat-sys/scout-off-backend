@@ -38,7 +38,8 @@ Histograms expose the usual `_bucket{le=…}`, `_sum` and `_count` series.
 | Metric | Type | Labels | Description |
 | ------ | ---- | ------ | ----------- |
 | `http_requests_total` | counter | `route` | Requests served, per route |
-| `http_request_duration_ms` | histogram | — | Request latency in milliseconds, across all routes |
+| `http_request_duration_seconds` | histogram | — | Request latency in seconds, across all routes |
+| `http_request_duration_ms` | histogram | — | Request latency in milliseconds, across all routes. Deprecated; emitted while `METRICS_LEGACY_MS` is not `false` |
 | `http_errors_total` | counter | `range` (`4xx`, `5xx`) | Error responses by status class |
 
 ### Cache
@@ -63,6 +64,10 @@ Histograms expose the usual `_bucket{le=…}`, `_sum` and `_count` series.
 | Metric | Type | Labels | Description |
 | ------ | ---- | ------ | ----------- |
 | `indexer_ledger_lag` | gauge | — | Ledgers behind the chain tip after the last indexer poll |
+| `scout_off_indexer_last_success_timestamp_seconds` | gauge | — | Unix time of the last successful indexer poll, including polls that found no events (0 = never) |
+| `scout_off_indexer_poll_failures_total` | counter | — | Failed indexer polls since process start |
+| `scout_off_circuit_breaker_state` | gauge | `breaker` | Circuit breaker state: 0 = closed, 1 = half-open, 2 = open |
+| `scout_off_circuit_breaker_transitions_total` | counter | `breaker`, `to` | Circuit breaker state transitions by destination state |
 | `stuck_pending_pins_count` | gauge | — | Pending IPFS pins older than the reconciliation cutoff. Updated by the pin reconciliation job |
 | `scout_off_tier_divergence_total` | counter | — | Players whose derived tier differs from stored `progress_level`, counted since process start (#1132) |
 
@@ -85,6 +90,30 @@ Histograms expose the usual `_bucket{le=…}`, `_sum` and `_count` series.
 | `ip_reputation_blocked_total` | counter | — | Requests blocked by IP reputation scoring |
 | `ip_reputation_penalised_total` | counter | — | Requests that got a reputation penalty (delay or rate restriction) |
 | `sse_connections_active` | gauge | — | Open SSE connections on this process |
+| `scout_off_auth_failures_total` | counter | `reason` | Authentication failures by reason |
+| `scout_off_rate_limit_rejected_total` | counter | `limiter` | Requests rejected with 429, by limiter namespace |
+| `scout_off_rate_limit_store_errors_total` | counter | — | Rate-limit store errors (requests were allowed through: fail-open) |
+| `scout_off_audit_chain_valid` | gauge | — | 1 when the last audit-log hash-chain verification passed, 0 after a break is found |
+| `scout_off_audit_chain_breaks_total` | counter | — | Audit-log hash-chain breaks detected since process start |
+
+### Indexer events
+
+| Metric | Type | Labels | Description |
+| ------ | ---- | ------ | ----------- |
+| `scout_off_indexer_events_total` | counter | `type`, `outcome` | Contract events seen by the indexer. A sustained `unknown_type`/`decode_error` rate means events are being parked in `indexer_unprocessed_events` |
+
+### Process and runtime
+
+| Metric | Type | Labels | Description |
+| ------ | ---- | ------ | ----------- |
+| `process_cpu_seconds_total` | counter | — | User and system CPU time, in seconds |
+| `process_resident_memory_bytes` | gauge | — | Resident memory size, in bytes |
+| `nodejs_heap_size_used_bytes` | gauge | — | V8 heap in use, in bytes |
+| `nodejs_heap_size_total_bytes` | gauge | — | V8 heap allocated, in bytes |
+| `nodejs_eventloop_lag_seconds` | gauge | — | Event-loop delay, 95th percentile, in seconds |
+| `nodejs_gc_duration_seconds` | histogram | — | Garbage-collection pause duration, in seconds |
+| `nodejs_active_handles_total` | gauge | — | Active libuv handles |
+| `scout_off_unhandled_rejections_total` | counter | — | Unhandled promise rejections since process start |
 
 ## Suggested alerts
 
