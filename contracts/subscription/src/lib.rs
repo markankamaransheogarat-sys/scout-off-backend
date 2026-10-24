@@ -855,7 +855,7 @@ mod tests {
         client.initialize(&admin, &token, &100);
         assert_eq!(
             client.try_set_platform_fee_bps(&admin, &10001u32),
-            Err(Ok(Error::InvalidInput))
+            Err(Ok(Error::FeeBpsOutOfRange))
         );
     }
 
