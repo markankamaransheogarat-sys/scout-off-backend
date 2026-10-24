@@ -77,7 +77,7 @@ integration('verified SQLite to Postgres migration (live service)', () => {
     expect((await pg.query("SELECT registered_at FROM players WHERE player_id='migration-null-date'")).rows[0].registered_at).toBeNull();
     expect((await pg.query("SELECT notify_enabled FROM scout_saved_searches WHERE name='off'")).rows[0].notify_enabled).toBe(false);
     expect((await pg.query("SELECT note_text FROM scout_player_notes WHERE scout_wallet='migration-wallet'")).rows[0].note_text).toBe('enc:v1:opaque-do-not-decrypt');
-    expect((await pg.query("SELECT count(*) AS n FROM webhook_subscriptions WHERE url='https://migration.example.test/hook'")).rows[0].n).toBe('2');
+    expect(Number((await pg.query("SELECT count(*) AS n FROM webhook_subscriptions WHERE url='https://migration.example.test/hook'")).rows[0].n)).toBe(2);
     expect((await pg.query("SELECT secret FROM webhook_subscriptions WHERE url='https://migration.example.test/hook' ORDER BY id LIMIT 1")).rows[0].secret).toBe('enc:v1:secret');
     const inserted = await pg.query("INSERT INTO events (type,ledger,tx_hash,payload) VALUES ('after_copy',125,'after-copy','{}') RETURNING id");
     expect(Number(inserted.rows[0].id)).toBeGreaterThan(90002);
@@ -105,7 +105,7 @@ integration('verified SQLite to Postgres migration (live service)', () => {
     });
     const report = await migrateSqliteToPostgres({ sqlitePath: source, databaseUrl: target, batchSize: 2, resume: true });
     expect(report.every(row => row.verified)).toBe(true);
-    expect((await pg.query("SELECT count(*) AS n FROM events WHERE type='migration_test'")).rows[0].n).toBe('2');
+    expect(Number((await pg.query("SELECT count(*) AS n FROM events WHERE type='migration_test'")).rows[0].n)).toBe(2);
   }, 90000);
 
   it('refuses occupied targets and changed sources on resume', async () => {
@@ -128,6 +128,6 @@ integration('verified SQLite to Postgres migration (live service)', () => {
     const sqlite = new Database(source);
     try { sqlite.prepare("UPDATE migrations SET checksum='invalid' WHERE id='001_initial.sql'").run(); } finally { sqlite.close(); }
     await expect(migrateSqliteToPostgres({ sqlitePath: source, databaseUrl: target })).rejects.toThrow('checksum mismatch');
-    expect((await pg.query('SELECT count(*) AS n FROM pg_tables WHERE schemaname=current_schema()')).rows[0].n).toBe('0');
+    expect(Number((await pg.query('SELECT count(*) AS n FROM pg_tables WHERE schemaname=current_schema()')).rows[0].n)).toBe(0);
   });
 });

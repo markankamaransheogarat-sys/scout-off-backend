@@ -22,7 +22,7 @@ describe('db/ migration Postgres parity', () => {
   it('every base migration has a _postgres.sql counterpart or is allowlisted', () => {
     const files = fs.readdirSync(DB_DIR).filter((f) => f.endsWith('.sql'));
     const baseFiles = files.filter(
-      (f) => !f.includes('_postgres') && !f.endsWith('.down.sql'),
+      (f) => !f.endsWith('_postgres.sql') && !f.endsWith('.down.sql'),
     );
 
     const unpaired = baseFiles.filter((f) => {
