@@ -235,7 +235,7 @@ try {
 
     const parsed = subscribeSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.errors[0]?.message ?? 'Invalid request body' });
+      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request body' });
       return;
     }
     const { tier, duration } = parsed.data;
@@ -297,7 +297,7 @@ try {
     const {wallet} = req.params as {wallet: string};
     const parsed = subscribeSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.errors[0]?.message ?? 'Invalid request body' });
+      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request body' });
       return;
     }
     const { tier, duration } = parsed.data;
@@ -533,7 +533,7 @@ try {
 
     const parsed = trialOfferSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.errors[0]?.message ?? 'Invalid request body' });
+      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request body' });
       return;
     }
     const { playerId, detailsUri } = parsed.data;
@@ -664,7 +664,7 @@ export async function getPaymentHistory(req: Request, res: Response, _next: Next
 
   const parsed = paymentHistoryQuerySchema.safeParse(req.query);
   if (!parsed.success) {
-    res.status(400).json({ success: false, error: parsed.error.errors[0]?.message ?? 'Invalid query parameters', code: ErrorCode.VALIDATION_ERROR });
+    res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid query parameters', code: ErrorCode.VALIDATION_ERROR });
     return;
   }
   const { from, to, type, page, pageSize, format } = parsed.data;

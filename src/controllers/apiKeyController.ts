@@ -72,7 +72,7 @@ export const rotateKeySchema = z.object({
     .min(0)
     .max(MAX_ROTATION_GRACE_PERIOD_SECONDS)
     .default(DEFAULT_ROTATION_GRACE_PERIOD_SECONDS),
-}).strict().default({});
+}).strict().prefault({});
 
 // ─── Handlers ─────────────────────────────────────────────────────────────────
 
@@ -92,7 +92,7 @@ export async function issueApiKey(
 ): Promise<void> {
   const parsed = issueKeySchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ success: false, error: parsed.error.errors[0]?.message ?? 'Invalid body' });
+    res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid body' });
     return;
   }
 
@@ -241,7 +241,7 @@ export async function rotateApiKey(
 
   const parsed = rotateKeySchema.safeParse(req.body ?? {});
   if (!parsed.success) {
-    res.status(400).json({ success: false, error: parsed.error.errors[0]?.message ?? 'Invalid body' });
+    res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid body' });
     return;
   }
 

@@ -128,9 +128,9 @@ export function getChallenge(req: Request, res: Response, _next: NextFunction): 
       correlationId: req.correlationId,
       origin: extractClientIp(req),
       attemptedAccount: (req.query.account as string) ?? null,
-      reason: parsed.error.errors[0]?.message,
+      reason: parsed.error.issues[0]?.message,
     });
-    res.status(400).json({ success: false, error: parsed.error.errors[0]?.message ?? 'Invalid request', code: ErrorCode.VALIDATION_ERROR });
+    res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request', code: ErrorCode.VALIDATION_ERROR });
     return;
   }
   const challenge = buildChallenge(parsed.data.account);
@@ -152,9 +152,9 @@ try {
       logger.warn('[auth] failed_token_request invalid_body', {
         correlationId: req.correlationId,
         origin: extractClientIp(req),
-        reason: parsed.error.errors[0]?.message,
+        reason: parsed.error.issues[0]?.message,
       });
-      res.status(400).json({ success: false, error: parsed.error.errors[0]?.message ?? 'Invalid request', code: ErrorCode.VALIDATION_ERROR });
+      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request', code: ErrorCode.VALIDATION_ERROR });
       return;
     }
     const { transaction, role } = parsed.data;
@@ -227,7 +227,7 @@ try {
     if (!parsed.success) {
       res.status(400).json({
         success: false,
-        error: parsed.error.errors[0]?.message ?? 'refreshToken is required',
+        error: parsed.error.issues[0]?.message ?? 'refreshToken is required',
         code: ErrorCode.VALIDATION_ERROR,
       });
       return;

@@ -85,7 +85,7 @@ export async function getAuditLog(req: Request, res: Response, _next: NextFuncti
   if (!parsed.success) {
     res.status(400).json({
       success: false,
-      error: parsed.error.errors[0]?.message ?? 'Invalid query parameters',
+      error: parsed.error.issues[0]?.message ?? 'Invalid query parameters',
       code: ErrorCode.VALIDATION_ERROR,
     });
     return;
@@ -110,7 +110,7 @@ const auditTrailQuerySchema = z.object({
     .string()
     .refine(
       (v) => (KNOWN_AUDIT_EVENT_TYPES as readonly string[]).includes(v),
-      (v) => ({ message: `Invalid eventType "${v}". Must be one of: ${KNOWN_AUDIT_EVENT_TYPES.join(', ')}` })
+      { error: (issue) => `Invalid eventType "${String(issue.input)}". Must be one of: ${KNOWN_AUDIT_EVENT_TYPES.join(', ')}` }
     )
     .optional(),
   /** ISO 8601 start of date range (inclusive). */
@@ -152,7 +152,7 @@ export async function getAuditTrail(req: Request, res: Response, _next: NextFunc
   if (!parsed.success) {
     res.status(400).json({
       success: false,
-      error: parsed.error.errors[0]?.message ?? 'Invalid query parameters',
+      error: parsed.error.issues[0]?.message ?? 'Invalid query parameters',
       code: ErrorCode.VALIDATION_ERROR,
     });
     return;

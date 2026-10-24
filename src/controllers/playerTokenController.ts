@@ -106,7 +106,7 @@ export async function buyPlayerToken(
   if (!parsed.success) {
     res.status(400).json({
       success: false,
-      error: parsed.error.errors.map((e) => e.message).join('; '),
+      error: parsed.error.issues.map((e) => e.message).join('; '),
     });
     return;
   }

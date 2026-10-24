@@ -22,7 +22,7 @@ export async function getStats(req: Request, res: Response, _next: NextFunction)
   if (!parsed.success) {
     res.status(400).json({
       success: false,
-      error: parsed.error.errors[0]?.message ?? 'Invalid query parameters',
+      error: parsed.error.issues[0]?.message ?? 'Invalid query parameters',
       code: ErrorCode.VALIDATION_ERROR,
     });
     return;

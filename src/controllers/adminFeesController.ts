@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
+import { requiredError } from '../validators/requiredError';
 import { queryEvents, insertFeeWithdrawal } from '../db';
 import { isValidStellarAddress } from '../utils/stellarAddress';
 import { STELLAR_ADDRESS_RE } from '../utils/validators';
@@ -101,7 +102,7 @@ export async function withdrawFeesController(req: Request, res: Response, next: 
     await logAuditEvent({
       action: 'fee_withdrawal_attempt',
       adminWallet,
-      queryParams: { error: 'validation_failed', reason: parsed.error.errors[0]?.message },
+      queryParams: { error: 'validation_failed', reason: parsed.error.issues[0]?.message },
       timestamp: new Date().toISOString(),
     }).catch(() => {});
     sendValidationError(res, parsed.error);
@@ -209,7 +210,7 @@ export async function withdrawFeesController(req: Request, res: Response, next: 
 
 export const withdrawFeesV2Schema = z.object({
   treasuryAddress: z
-    .string({ required_error: 'treasuryAddress is required' })
+    .string(requiredError('treasuryAddress is required'))
     .refine(isValidStellarAddress, {
       message: 'treasuryAddress must be a valid Stellar public key',
     }),
@@ -264,7 +265,7 @@ export async function withdrawFeesV2Controller(
   // ── 2. Zod validation ───────────────────────────────────────────────────────
   const parsed = withdrawFeesV2Schema.safeParse(req.body);
   if (!parsed.success) {
-    const reason = parsed.error.errors[0]?.message ?? 'Invalid request body';
+    const reason = parsed.error.issues[0]?.message ?? 'Invalid request body';
     await logAuditEvent({
       action: 'fee_withdrawal_attempt',
       adminWallet,

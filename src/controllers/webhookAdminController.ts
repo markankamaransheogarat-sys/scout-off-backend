@@ -31,7 +31,7 @@ export async function listDeadLetters(req: Request, res: Response, _next: NextFu
   if (!parsed.success) {
     res.status(400).json({
       success: false,
-      error: parsed.error.errors[0]?.message ?? 'Invalid query parameters',
+      error: parsed.error.issues[0]?.message ?? 'Invalid query parameters',
     });
     return;
   }
@@ -79,7 +79,7 @@ try {
     if (!parsedParams.success) {
       res.status(400).json({
         success: false,
-        error: parsedParams.error.errors[0]?.message ?? 'Invalid id',
+        error: parsedParams.error.issues[0]?.message ?? 'Invalid id',
       });
       return;
     }
@@ -148,7 +148,7 @@ export async function purgeDeadLetter(req: Request, res: Response, _next: NextFu
   if (!parsedParams.success) {
     res.status(400).json({
       success: false,
-      error: parsedParams.error.errors[0]?.message ?? 'Invalid id',
+      error: parsedParams.error.issues[0]?.message ?? 'Invalid id',
     });
     return;
   }
@@ -179,7 +179,7 @@ export async function purgeOldDeadLetters(req: Request, res: Response, _next: Ne
   if (!parsed.success) {
     res.status(400).json({
       success: false,
-      error: parsed.error.errors[0]?.message ?? 'Invalid query parameters',
+      error: parsed.error.issues[0]?.message ?? 'Invalid query parameters',
     });
     return;
   }

@@ -47,7 +47,7 @@ const baseRegistrationSchema = z.object({
   region: z.string().min(1),
 });
 
-const metadataSchema = z.record(z.unknown());
+const metadataSchema = z.record(z.string(), z.unknown());
 const metadataUriSchema = z
   .string()
   .min(1)
@@ -231,7 +231,7 @@ export async function getPlayer(
 ): Promise<void> {
   const idResult = playerIdSchema.safeParse(req.params.playerId as string);
   if (!idResult.success) {
-    res.status(400).json({ success: false, error: idResult.error.errors[0]?.message ?? "Invalid playerId", code: ErrorCode.VALIDATION_ERROR });
+    res.status(400).json({ success: false, error: idResult.error.issues[0]?.message ?? "Invalid playerId", code: ErrorCode.VALIDATION_ERROR });
     return;
   }
   const playerId = sanitizeInput(req.params.playerId as string);
@@ -474,7 +474,7 @@ export async function filterPlayers(
 
 /** PUT /api/players/:playerId — profile owner only */
 export const updatePlayerSchema = z.union([
-  z.object({ metadata: z.record(z.unknown()) }).strict(),
+  z.object({ metadata: z.record(z.string(), z.unknown()) }).strict(),
   z.object({ metadataUri: metadataUriSchema }).strict(),
 ]);
 
@@ -571,7 +571,7 @@ export async function getPlayerMilestones(
 ): Promise<void> {
   const idResult = playerIdSchema.safeParse(req.params.playerId as string);
   if (!idResult.success) {
-    res.status(400).json({ success: false, error: idResult.error.errors[0]?.message ?? "Invalid playerId", code: ErrorCode.VALIDATION_ERROR });
+    res.status(400).json({ success: false, error: idResult.error.issues[0]?.message ?? "Invalid playerId", code: ErrorCode.VALIDATION_ERROR });
     return;
   }
   const playerId = sanitizeInput(req.params.playerId as string);
@@ -606,7 +606,7 @@ export async function getPlayerMilestones(
   if (!parsed.success) {
     res.status(400).json({
       success: false,
-      error: parsed.error.errors[0]?.message ?? "Invalid query parameters",
+      error: parsed.error.issues[0]?.message ?? "Invalid query parameters",
       code: ErrorCode.VALIDATION_ERROR,
     });
     return;
@@ -753,7 +753,7 @@ export async function deactivatePlayerEndpoint(
 ): Promise<void> {
   const idResult = playerIdSchema.safeParse(req.params.playerId as string);
   if (!idResult.success) {
-    res.status(400).json({ success: false, error: idResult.error.errors[0]?.message ?? "Invalid playerId", code: ErrorCode.VALIDATION_ERROR });
+    res.status(400).json({ success: false, error: idResult.error.issues[0]?.message ?? "Invalid playerId", code: ErrorCode.VALIDATION_ERROR });
     return;
   }
   const playerId = sanitizeInput(req.params.playerId as string);
@@ -775,7 +775,7 @@ export async function reactivatePlayerEndpoint(
 ): Promise<void> {
   const idResult = playerIdSchema.safeParse(req.params.playerId as string);
   if (!idResult.success) {
-    res.status(400).json({ success: false, error: idResult.error.errors[0]?.message ?? "Invalid playerId", code: ErrorCode.VALIDATION_ERROR });
+    res.status(400).json({ success: false, error: idResult.error.issues[0]?.message ?? "Invalid playerId", code: ErrorCode.VALIDATION_ERROR });
     return;
   }
   const playerId = sanitizeInput(req.params.playerId as string);
@@ -804,7 +804,7 @@ export async function getPlayerAnalytics(
   if (!idResult.success) {
     res.status(400).json({
       success: false,
-      error: idResult.error.errors[0]?.message ?? "Invalid playerId",
+      error: idResult.error.issues[0]?.message ?? "Invalid playerId",
       code: ErrorCode.VALIDATION_ERROR,
     });
     return;

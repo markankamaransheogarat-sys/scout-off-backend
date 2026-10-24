@@ -202,7 +202,7 @@ export async function rejectTrialOffer(req: Request, res: Response, _next: NextF
   // validateBody(rejectOfferSchema), so this is the direct-invocation guard.
   const bodyParsed = rejectOfferSchema.safeParse(req.body);
   if (!bodyParsed.success) {
-    res.status(400).json({ success: false, error: bodyParsed.error.errors[0]?.message ?? 'Invalid request body' });
+    res.status(400).json({ success: false, error: bodyParsed.error.issues[0]?.message ?? 'Invalid request body' });
     return;
   }
   const reason = bodyParsed.data.reason;

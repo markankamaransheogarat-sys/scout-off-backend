@@ -89,7 +89,7 @@ export async function createSavedSearch(
   if (!parsed.success) {
     res.status(400).json({
       success: false,
-      error: parsed.error.errors[0]?.message ?? 'Invalid request body',
+      error: parsed.error.issues[0]?.message ?? 'Invalid request body',
     });
     return;
   }
@@ -225,7 +225,7 @@ export async function updateSavedSearchHandler(
   if (!parsed.success) {
     res.status(400).json({
       success: false,
-      error: parsed.error.errors[0]?.message ?? 'Invalid request body',
+      error: parsed.error.issues[0]?.message ?? 'Invalid request body',
     });
     return;
   }

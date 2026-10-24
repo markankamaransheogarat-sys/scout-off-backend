@@ -103,7 +103,7 @@ export async function getPlayerHistory(
   if (!idResult.success) {
     res.status(400).json({
       success: false,
-      error: idResult.error.errors[0]?.message ?? "Invalid playerId",
+      error: idResult.error.issues[0]?.message ?? "Invalid playerId",
       code: ErrorCode.VALIDATION_ERROR,
     });
     return;
@@ -156,7 +156,7 @@ export async function getPlayerHistoryVersion(
   if (!idResult.success) {
     res.status(400).json({
       success: false,
-      error: idResult.error.errors[0]?.message ?? "Invalid playerId",
+      error: idResult.error.issues[0]?.message ?? "Invalid playerId",
       code: ErrorCode.VALIDATION_ERROR,
     });
     return;
@@ -166,7 +166,7 @@ export async function getPlayerHistoryVersion(
   if (!versionResult.success) {
     res.status(400).json({
       success: false,
-      error: versionResult.error.errors[0]?.message ?? "Invalid version",
+      error: versionResult.error.issues[0]?.message ?? "Invalid version",
       code: ErrorCode.VALIDATION_ERROR,
     });
     return;
@@ -229,7 +229,7 @@ export async function getPlayerHistoryDiff(
   if (!idResult.success) {
     res.status(400).json({
       success: false,
-      error: idResult.error.errors[0]?.message ?? "Invalid playerId",
+      error: idResult.error.issues[0]?.message ?? "Invalid playerId",
       code: ErrorCode.VALIDATION_ERROR,
     });
     return;
@@ -239,7 +239,7 @@ export async function getPlayerHistoryDiff(
   if (!versionResult.success) {
     res.status(400).json({
       success: false,
-      error: versionResult.error.errors[0]?.message ?? "Invalid version",
+      error: versionResult.error.issues[0]?.message ?? "Invalid version",
       code: ErrorCode.VALIDATION_ERROR,
     });
     return;

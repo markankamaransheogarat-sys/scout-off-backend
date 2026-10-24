@@ -110,7 +110,7 @@ async function prepareEntry(
       entry && typeof entry === 'object'
         ? (entry as Record<string, unknown>).wallet as string | undefined
         : undefined;
-    return { row, wallet: rawWallet, error: parsed.error.errors[0]?.message ?? 'Invalid entry' };
+    return { row, wallet: rawWallet, error: parsed.error.issues[0]?.message ?? 'Invalid entry' };
   }
 
   const { wallet } = parsed.data;
@@ -308,7 +308,7 @@ export async function importPlayers(req: Request, res: Response, _next: NextFunc
     if (!parsed.success) {
       res.status(400).json({
         success: false,
-        error: parsed.error.errors[0]?.message ?? 'Request body must contain a "players" array or use Content-Type: text/csv',
+        error: parsed.error.issues[0]?.message ?? 'Request body must contain a "players" array or use Content-Type: text/csv',
         code: ErrorCode.VALIDATION_ERROR,
       });
       return;

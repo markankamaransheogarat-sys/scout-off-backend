@@ -11,6 +11,7 @@
  */
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
+import { requiredError } from '../validators/requiredError';
 import { getAllFeatureFlags, getFeatureFlag } from '../db';
 import { setFeatureFlag, clearFeatureFlagCache } from '../services/featureFlags';
 
@@ -29,7 +30,7 @@ export const updateFeatureFlagBodySchema = z.object({
 }).strict();
 
 export const toggleFlagBodySchema = z.object({
-  enabled: z.boolean({ required_error: 'enabled is required' }),
+  enabled: z.boolean(requiredError('enabled is required')),
 }).strict();
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -86,7 +87,7 @@ export async function updateFeatureFlag(
   if (!parsed.success) {
     res.status(400).json({
       success: false,
-      error: parsed.error.errors[0]?.message ?? 'Invalid request body',
+      error: parsed.error.issues[0]?.message ?? 'Invalid request body',
     });
     return;
   }
@@ -136,7 +137,7 @@ export async function toggleFeatureFlag(
   if (!parsed.success) {
     res.status(400).json({
       success: false,
-      error: parsed.error.errors[0]?.message ?? 'Invalid request body',
+      error: parsed.error.issues[0]?.message ?? 'Invalid request body',
     });
     return;
   }

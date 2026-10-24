@@ -61,7 +61,7 @@ export async function anonymizePlayer(
     if (!idResult.success) {
       res.status(400).json({
         success: false,
-        error: idResult.error.errors[0]?.message ?? 'Invalid playerId',
+        error: idResult.error.issues[0]?.message ?? 'Invalid playerId',
         code: ErrorCode.VALIDATION_ERROR,
       });
       return;

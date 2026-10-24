@@ -101,7 +101,7 @@ export function errorHandler(
   if (err instanceof ZodError) {
     const body: ApiResponse & { code: string; correlationId?: string } = {
       success: false,
-      error: err.errors[0]?.message ?? 'Validation error',
+      error: err.issues[0]?.message ?? 'Validation error',
       code: ErrorCode.VALIDATION_ERROR,
       ...(correlationId !== undefined && { correlationId }),
     };

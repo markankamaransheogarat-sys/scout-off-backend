@@ -14,7 +14,7 @@ export const revokeTokenSchema = z.object({
 export async function revokeTokenController(req: Request, res: Response, _next: NextFunction): Promise<void> {
   const parsed = revokeTokenSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ success: false, error: parsed.error.errors[0]?.message ?? 'jti or token is required', code: ErrorCode.VALIDATION_ERROR });
+    res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'jti or token is required', code: ErrorCode.VALIDATION_ERROR });
     return;
   }
 

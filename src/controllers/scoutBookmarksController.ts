@@ -7,6 +7,7 @@
  */
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
+import { requiredError } from '../validators/requiredError';
 import {
   getPlayerById,
   insertBookmark,
@@ -30,7 +31,7 @@ import { logger } from '../utils/logger';
 
 export const addBookmarkSchema = z.object({
   playerId: z
-    .string({ required_error: 'playerId is required' })
+    .string(requiredError('playerId is required'))
     .min(1, 'playerId is required'),
   folderId: z.number().int().optional().nullable(),
   note: z.string().max(2000).optional().nullable(),
@@ -38,7 +39,7 @@ export const addBookmarkSchema = z.object({
 
 export const createBookmarkFolderSchema = z.object({
   name: z
-    .string({ required_error: 'name is required and must be a string' })
+    .string(requiredError('name is required and must be a string'))
     .min(1, 'name is required and must be a string')
     .max(100),
 }).strict();

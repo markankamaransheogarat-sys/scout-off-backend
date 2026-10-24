@@ -187,6 +187,7 @@ jobs:
       - name: Seed SQLite migration fixture
         run: npm run seed
         env:
+          NODE_ENV: test
           DB_DRIVER: sqlite
           DB_PATH: ${{ runner.temp }}/migration-source.db
           CONTRACT_ID: CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4

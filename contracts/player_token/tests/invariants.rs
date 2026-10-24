@@ -287,6 +287,8 @@ mod role_invariants {
         #[test]
         fn invariants_role_grants_are_isolated_and_last_admin_survives(operations in proptest::collection::vec(any::<bool>(), 1..20)) {
             let env = Env::default();
+            // Up to 20 role operations per case exceed the default per-test budget.
+            env.budget().reset_unlimited();
             env.mock_all_auths();
             let id = env.register_contract(None, PlayerTokenContract);
             let client = PlayerTokenContractClient::new(&env, &id);

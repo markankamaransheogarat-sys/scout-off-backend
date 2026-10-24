@@ -118,7 +118,7 @@ export async function exportEvents(req: Request, res: Response, _next: NextFunct
   if (!parsed.success) {
     res.status(400).json({
       success: false,
-      error: parsed.error.errors[0]?.message ?? 'Invalid query parameters',
+      error: parsed.error.issues[0]?.message ?? 'Invalid query parameters',
     });
     return;
   }

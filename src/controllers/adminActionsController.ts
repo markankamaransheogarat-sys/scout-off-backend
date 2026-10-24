@@ -21,7 +21,7 @@ export async function updatePlatformFeeController(req: Request, res: Response, n
     const adminWallet = req.account ?? 'unknown';
     const parsed = updatePlatformFeeSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.errors[0]?.message ?? 'Invalid request body' });
+      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request body' });
       return;
     }
 
@@ -70,7 +70,7 @@ export async function bulkValidatorImport(req: Request, res: Response, next: Nex
     const adminWallet = req.account ?? 'unknown';
     const parsed = bulkValidatorImportSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.errors[0]?.message ?? 'Invalid request body' });
+      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request body' });
       return;
     }
 
